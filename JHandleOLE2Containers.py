@@ -16,6 +16,7 @@ class ReadWriteOLE2Containers:
       fin.read(buf)
       print buf
 
+   #https://poi.apache.org/hpsf/how-to.html#sec3
    def replaceSummaryInfo(self, ole2filename):
 
       fin = FileInputStream(ole2filename)
