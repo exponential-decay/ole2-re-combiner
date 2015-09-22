@@ -49,16 +49,27 @@ class ReadWriteOLE2Containers:
       fs.writeFilesystem(out);
       out.close();
 
+   def __makeoutputdir__(self, ole2filename):
+      dirname = ole2filename.split('.')[0]
+      if not os.path.exists(dirname):
+         os.makedirs(dirname)
+      return dirname
+
    def extractContainer(self, ole2filename):
    
       fin = FileInputStream(ole2filename)
       fs = NPOIFSFileSystem(fin)
       root = fs.getRoot()
 
+      outdir = self.__makeoutputdir__(ole2filename)
+
       for obj in root:         
          fname = obj.getShortDescription()
+         
+         #replace strange ole2 characters we can't save in filesystem, todo: check spec
          fname = fname.replace(self.replacechar1, '[1]').replace(self.replacechar5, '[5]')
-         f = open("tmp/" + fname, "wb")
+         
+         f = open(outdir + "/" + fname, "wb")
          size = obj.getSize()
          stream = DocumentInputStream(obj); 
          bytes = zeros(size, 'b')
