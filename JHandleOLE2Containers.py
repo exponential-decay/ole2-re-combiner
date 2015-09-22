@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import uniqid
 
 from jarray import zeros
@@ -10,6 +11,9 @@ from org.apache.poi.poifs.filesystem import NPOIFSFileSystem, DocumentInputStrea
 from org.apache.poi.hpsf import SummaryInformation, PropertySetFactory, PropertySet
 
 class ReadWriteOLE2Containers:
+
+   replacechar1 = '\x01'
+   replacechar5 = '\x05'
 
    def __debugfos__(self, fos, bufsize):
       buf = zeros(bufsize, 'b')
@@ -51,9 +55,10 @@ class ReadWriteOLE2Containers:
       fs = NPOIFSFileSystem(fin)
       root = fs.getRoot()
 
-      for obj in root:
+      for obj in root:         
          fname = obj.getShortDescription()
-         f = open(u"tmp/" + fname, "wb")
+         fname = fname.replace(self.replacechar1, '[1]').replace(self.replacechar5, '[5]')
+         f = open("tmp/" + fname, "wb")
          size = obj.getSize()
          stream = DocumentInputStream(obj); 
          bytes = zeros(size, 'b')
@@ -63,14 +68,10 @@ class ReadWriteOLE2Containers:
          f.close()
 
    def writeContainer(self, containerfoldername, ext, outputfilename=False):
-
       written = False
-
       if outputfilename == False:
          outputfilename = containerfoldername.strip('/') + "-" + uniqid.uniqid() + "." + ext.strip('.')
-
-      containerfoldername = containerfoldername + "/"
-
+      containerfoldername = containerfoldername
       #we have folder name, written earlier
       #foldername is filename!!   
       if os.path.isdir(containerfoldername):
@@ -84,7 +85,7 @@ class ReadWriteOLE2Containers:
                break
             else:
                for f in files:
-                  fin = FileInputStream(folder + f)
+                  fin = FileInputStream(folder + '/' + f)
                   if fin.getChannel().size() == 0:
                      fin.close()
                      written = False
@@ -93,11 +94,13 @@ class ReadWriteOLE2Containers:
                      root.createDocument(f, fin)
                      fin.close()
                      written = True
-
-         if written == True:
-            fos = FileOutputStream(fname)
-            fs.writeFilesystem(fos);
-            fs.close()
+      else:
+         sys.exit("Not a valid folder: " + containerfoldername)
+            
+      if written == True:
+         fos = FileOutputStream(fname)
+         fs.writeFilesystem(fos);
+         fs.close()
 
       return written
 
