@@ -30,13 +30,13 @@ def main():
 
    if args.fixsummary:
       if arg_check(len(sys.argv),3):
-         ole2class.replaceSummaryInfo("rsdocfile.doc")
+         ole2class.replaceSummaryInfo(args.fixsummary)
    elif args.blanksummary:
       if arg_check(len(sys.argv),3):
-         ole2class.replaceSummaryInfo("rsdocfile.doc", True)      
+         ole2class.replaceSummaryInfo(args.blanksummary, True)      
    elif args.extract:
       if arg_check(len(sys.argv),3):
-         ole2class.extractContainer("rsdocfile.doc")
+         ole2class.extractContainer(args.extract)
    elif args.combine:
       if not args.ext:
          ole2class.writeContainer(args.combine, '')
