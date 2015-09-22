@@ -20,6 +20,9 @@ class ReadWriteOLE2Containers:
       fin.read(buf)
       print buf
 
+   def replaceDocumentSummary(self, ole2filename, blank=False):
+      return True
+
    #https://poi.apache.org/hpsf/how-to.html#sec3
    def replaceSummaryInfo(self, ole2filename, blank=False):
 
