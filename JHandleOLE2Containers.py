@@ -8,7 +8,7 @@ from jarray import zeros
 from java.io import FileOutputStream, FileInputStream, ByteArrayOutputStream
 
 from org.apache.poi.poifs.filesystem import NPOIFSFileSystem, DocumentInputStream
-from org.apache.poi.hpsf import SummaryInformation, PropertySetFactory, PropertySet
+from org.apache.poi.hpsf import SummaryInformation, DocumentSummaryInformation, PropertySetFactory, PropertySet
 
 class ReadWriteOLE2Containers:
 
@@ -21,7 +21,30 @@ class ReadWriteOLE2Containers:
       print buf
 
    def replaceDocumentSummary(self, ole2filename, blank=False):
-      return True
+      fin = FileInputStream(ole2filename)
+      fs = NPOIFSFileSystem(fin)
+      root = fs.getRoot()
+      si = False
+      siFound = False
+      for obj in root:
+         x = obj.getShortDescription()
+         if x == (u"\u0005" + "DocumentSummaryInformation"):   
+            siFound=True
+            if blank == False:
+               test = root.getEntry((u"\u0005" + "DocumentSummaryInformation")) 
+               dis = DocumentInputStream(test);
+               ps = PropertySet(dis);
+               si = DocumentSummaryInformation(ps)
+
+      if blank == False and siFound == True:
+         si.write(root, (u"\u0005" + "DocumentSummaryInformation"))
+      else:
+         ps = PropertySetFactory.newDocumentSummaryInformation()      
+         ps.write(root, (u"\u0005" + "DocumentSummaryInformation"));
+      
+      out = FileOutputStream(ole2filename);
+      fs.writeFilesystem(out);
+      out.close();
 
    #https://poi.apache.org/hpsf/how-to.html#sec3
    def replaceSummaryInfo(self, ole2filename, blank=False):
