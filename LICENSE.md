@@ -1,19 +1,3 @@
-# ole2-re-combiner
-Jython OLE2 re-Combing tool...
-
-Requires Jython with Apache POI on the CLASSPATH. Example command to run:
-
-* jython -Dpython.path=$CLASSPATH ole2recombiner.py --dir Dir2Combine/
-* jython -Dpython.path=$CLASSPATH ole2recombiner.py --ole2 file2split.doc
-
-Example on Windows: 
-
-* jython -Dpython.path=%CLASSPATH%\poi-3.13-beta1-20150723.jar ole2recombiner.py
-
-Example CLASSPATH: :/usr/bin/poi/poi-3.11-beta2/poi-3.11-beta2-20140822.jar
-
-# License
-
 Copyright 2015 Ross Spencer
 
 Licensed under the Apache License, Version 2.0 (the "License");
