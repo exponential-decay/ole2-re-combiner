@@ -8,7 +8,7 @@ from jarray import zeros
 from java.io import FileOutputStream, FileInputStream, ByteArrayOutputStream
 
 from org.apache.poi.poifs.filesystem import NPOIFSFileSystem, DocumentInputStream
-from org.apache.poi.hpsf import SummaryInformation, DocumentSummaryInformation, PropertySetFactory, PropertySet
+from org.apache.poi.hpsf import SummaryInformation, DocumentSummaryInformation, PropertySetFactory, PropertySet, UnexpectedPropertySetTypeException
 
 class ReadWriteOLE2Containers:
 
@@ -34,8 +34,12 @@ class ReadWriteOLE2Containers:
                test = root.getEntry((u"\u0005" + "DocumentSummaryInformation")) 
                dis = DocumentInputStream(test);
                ps = PropertySet(dis);
-               si = DocumentSummaryInformation(ps)
-
+               try:
+                  si = DocumentSummaryInformation(ps)
+               except UnexpectedPropertySetTypeException as e:
+                  sys.stderr.write("Error writing old DocumentSymmaryInformation:" + str(e).replace('org.apache.poi.hpsf.UnexpectedPropertySetTypeException:',''))
+                  sys.exit(1)
+                  
       if blank == False and siFound == True:
          si.write(root, (u"\u0005" + "DocumentSummaryInformation"))
       else:
@@ -44,7 +48,7 @@ class ReadWriteOLE2Containers:
       
       out = FileOutputStream(ole2filename);
       fs.writeFilesystem(out);
-      out.close();
+      out.close();'''
 
    #https://poi.apache.org/hpsf/how-to.html#sec3
    def replaceSummaryInfo(self, ole2filename, blank=False):
