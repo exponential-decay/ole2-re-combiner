@@ -48,7 +48,7 @@ class ReadWriteOLE2Containers:
       
       out = FileOutputStream(ole2filename);
       fs.writeFilesystem(out);
-      out.close();'''
+      out.close();
 
    #https://poi.apache.org/hpsf/how-to.html#sec3
    def replaceSummaryInfo(self, ole2filename, blank=False):
