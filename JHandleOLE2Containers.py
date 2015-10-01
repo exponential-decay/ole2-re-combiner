@@ -7,7 +7,7 @@ import uniqid
 from jarray import zeros
 from java.io import FileOutputStream, FileInputStream, ByteArrayOutputStream
 
-from org.apache.poi.poifs.filesystem import NPOIFSFileSystem, DocumentInputStream
+from org.apache.poi.poifs.filesystem import NPOIFSFileSystem, DocumentInputStream, DirectoryNode
 from org.apache.poi.hpsf import SummaryInformation, DocumentSummaryInformation, PropertySetFactory, PropertySet, UnexpectedPropertySetTypeException
 
 class ReadWriteOLE2Containers:
@@ -93,20 +93,23 @@ class ReadWriteOLE2Containers:
 
       outdir = self.__makeoutputdir__(ole2filename)
 
-      for obj in root:         
+      for obj in root:   
          fname = obj.getShortDescription()
          
-         #replace strange ole2 characters we can't save in filesystem, todo: check spec
-         fname = fname.replace(self.replacechar1, '[1]').replace(self.replacechar5, '[5]')
-         
-         f = open(outdir + "/" + fname, "wb")
-         size = obj.getSize()
-         stream = DocumentInputStream(obj); 
-         bytes = zeros(size, 'b')
-         n_read = stream.read(bytes)
-         data = bytes.tostring()         
-         f.write(data)
-         f.close()
+         if type(obj) is DirectoryNode:
+            os.makedirs(outdir + '/' + fname)
+         else:
+            #replace strange ole2 characters we can't save in filesystem, todo: check spec
+            fname = fname.replace(self.replacechar1, '[1]').replace(self.replacechar5, '[5]')
+            
+            f = open(outdir + "/" + fname, "wb")
+            size = obj.getSize()
+            stream = DocumentInputStream(obj); 
+            bytes = zeros(size, 'b')
+            n_read = stream.read(bytes)
+            data = bytes.tostring()         
+            f.write(data)
+            f.close()
 
    def writeContainer(self, containerfoldername, ext, outputfilename=False):
       written = False
