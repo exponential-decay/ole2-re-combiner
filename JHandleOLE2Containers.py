@@ -85,19 +85,15 @@ class ReadWriteOLE2Containers:
          os.makedirs(dirname)
       return dirname
 
-   def extractContainer(self, ole2filename):
-   
-      fin = FileInputStream(ole2filename)
-      fs = NPOIFSFileSystem(fin)
-      root = fs.getRoot()
-
-      outdir = self.__makeoutputdir__(ole2filename)
-
+   def recurse_dir(self, root, outdir):
+      #TODO: Are we going to miss objects if we recurse too early? 
       for obj in root:   
          fname = obj.getShortDescription()
          
          if type(obj) is DirectoryNode:
-            os.makedirs(outdir + '/' + fname)
+            outdir = outdir + '/' + fname
+            os.makedirs(outdir)
+            self.recurse_dir(obj, outdir)
          else:
             #replace strange ole2 characters we can't save in filesystem, todo: check spec
             fname = fname.replace(self.replacechar1, '[1]').replace(self.replacechar5, '[5]')
@@ -110,6 +106,15 @@ class ReadWriteOLE2Containers:
             data = bytes.tostring()         
             f.write(data)
             f.close()
+
+   def extractContainer(self, ole2filename):
+   
+      fin = FileInputStream(ole2filename)
+      fs = NPOIFSFileSystem(fin)
+      root = fs.getRoot()
+      outdir = self.__makeoutputdir__(ole2filename)
+
+      self.recurse_dir(root, outdir)
 
    def writeContainer(self, containerfoldername, ext, outputfilename=False):
       written = False
