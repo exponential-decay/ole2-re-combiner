@@ -83,19 +83,28 @@ class ReadWriteOLE2Containers:
       dirname = ole2filename.split('.')[0]
       if not os.path.exists(dirname):
          os.makedirs(dirname)
+      else:
+         sys.exit("Directory to output OLE2 contents to already exists.")
       return dirname
 
    def recurse_dir(self, root, outdir):
-      #TODO: Are we going to miss objects if we recurse too early? 
+      #Cache DirectoryNode and directory name
+      dircache = {'object': False, 'directory': False}
+      
       for obj in root:   
          fname = obj.getShortDescription()
          
          if type(obj) is DirectoryNode:
-            outdir = outdir + '/' + fname
-            os.makedirs(outdir)
-            self.recurse_dir(obj, outdir)
-         else:
+            tmpoutdir = outdir + '/' + fname
+            os.makedirs(tmpoutdir)
+            if dircache['object'] is False:
+               dircache['object'] = obj
+               dircache['directory'] = tmpoutdir
+            else:
+               sys.stderr.write("Check container in 7-Zip, likely more dirs at a root DirectoryNode than expected.")
+         else:         
             #replace strange ole2 characters we can't save in filesystem, todo: check spec
+            #this seems to be the convention in 7-Zip, and it seems to work...
             fname = fname.replace(self.replacechar1, '[1]').replace(self.replacechar5, '[5]')
             
             f = open(outdir + "/" + fname, "wb")
@@ -106,6 +115,10 @@ class ReadWriteOLE2Containers:
             data = bytes.tostring()         
             f.write(data)
             f.close()
+      
+      #only recurse if we have an object to recurse into after processing DocumentNodes
+      if dircache['object'] != False:
+         self.recurse_dir(dircache['object'], dircache['directory'])
 
    def extractContainer(self, ole2filename):
    
